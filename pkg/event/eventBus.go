@@ -10,3 +10,4 @@ type EventBus struct {
 func Subscribe[T any](b *EventBus, handler func(T) error) {
 	event.Subscribe(b.bus, handler)
 }
+
