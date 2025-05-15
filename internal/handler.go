@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 )
 
-var dispatchHandler messageHandler = func(wc *WebsocketConn, data []byte, t string) error {
+var dispatchHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
 	wc.logger.Debug().Msg("Dispatch recieved from Discord with T: " + t)
 	return nil
 }
 
-var heartbeatHandler messageHandler = func(wc *WebsocketConn, data []byte, t string) error {
+var heartbeatHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
 	return wc.sendHeartbeat()
 }
 
-var helloHandler messageHandler = func(wc *WebsocketConn, data []byte, t string) error {
+var helloHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
 	wc.logger.Debug().Msg("Hello received from Discord")
 	type helloMessage struct {
 		HeartbeatInterval int64 `json:"heartbeat_interval"`
@@ -29,14 +29,14 @@ var helloHandler messageHandler = func(wc *WebsocketConn, data []byte, t string)
 	wc.heartbeatInterval = msg.HeartbeatInterval
 	wc.logger.Debug().Msgf("Heartbeat interval received: %d", msg.HeartbeatInterval)
 
-	wc.StartHeartbeat()
+	wc.startHeartbeat()
 
 	wc.sendIdentify()
 
 	return nil
 }
 
-var heartbeatAckHandler messageHandler = func(wc *WebsocketConn, data []byte, t string) error {
+var heartbeatAckHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
 	wc.logger.Debug().Msg("Heartbeat acked")
 	wc.receivedHeatbeat()
 	return nil

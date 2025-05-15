@@ -11,7 +11,7 @@ import (
 
 const discordGateway = "wss://gateway.discord.gg/?v=10&encoding=json"
 
-type messageHandler func(wc *WebsocketConn, data []byte, t string) error
+type messageHandler func(wc *websocketConn, data []byte, t string) error
 
 type websocketEvent struct {
 	Op int    `json:"op"`
@@ -31,7 +31,7 @@ type incomingWebsocketEvent struct {
 
 var messageHandlers = make(map[int]messageHandler)
 
-type WebsocketConn struct {
+type websocketConn struct {
 	logger zerolog.Logger
 	conn   *websocket.Conn
 
@@ -54,19 +54,12 @@ type WebsocketConn struct {
 	ready bool
 }
 
-func MakeWebsocketConn(logger *zerolog.Logger, token string) *WebsocketConn {
+func makeWebsocketConn(logger *zerolog.Logger, token string) *websocketConn {
 	newLogger := logger.With().Str("address", discordGateway).Logger()
-	conn, _, err := websocket.DefaultDialer.Dial(discordGateway, nil)
-	if err != nil {
-		logger.Error().Err(err).Msg("Error while dialing websocket")
-		return nil
-	}
+	
 
-	logger.Info().Msg("Successfully connected to Discord gateway")
-
-	return &WebsocketConn{
+	return &websocketConn{
 		logger: newLogger,
-		conn:   conn,
 
 		token:   token,
 		intents: 1,
@@ -77,15 +70,29 @@ func MakeWebsocketConn(logger *zerolog.Logger, token string) *WebsocketConn {
 	}
 }
 
-func (wc *WebsocketConn) StartReading() {
+func (wc *websocketConn) connect() error {
+	conn, _, err := websocket.DefaultDialer.Dial(discordGateway, nil)
+	if err != nil {
+		wc.logger.Error().Err(err).Msg("Error while dialing websocket")
+		return err
+	}
+
+	wc.logger.Info().Msg("Successfully connected to Discord gateway")
+
+	wc.conn = conn
+
+	return nil
+}
+
+func (wc *websocketConn) startReading() {
 	go func() {
 		for {
-			wc.Read()
+			wc.read()
 		}
 	}()
 }
 
-func (wc *WebsocketConn) Read() {
+func (wc *websocketConn) read() {
 	messageType, data, err := wc.conn.ReadMessage()
 	if err != nil {
 		wc.logger.Error().Err(err).Msg("Error reading from websocket")
@@ -118,7 +125,7 @@ func (wc *WebsocketConn) Read() {
 	}
 }
 
-func (wc *WebsocketConn) StartHeartbeat() {
+func (wc *websocketConn) startHeartbeat() {
 	go func() {
 		wc.receivedHeatbeat()
 
@@ -150,14 +157,14 @@ func (wc *WebsocketConn) StartHeartbeat() {
 	}()
 }
 
-func (wc *WebsocketConn) sendHeartbeat() error {
+func (wc *websocketConn) sendHeartbeat() error {
 	wc.lastHeartbeat = time.Now().Local().UnixMilli()
 	wc.heartbeatAckReceived = false
 
 	return wc.writeEvent(wc.lastSeq, OpCodeHeartbeat, "")
 }
 
-func (wc *WebsocketConn) sendIdentify() error {
+func (wc *websocketConn) sendIdentify() error {
 	wc.logger.Debug().Msg("Identify sent")
 	payload := &IdentifyPayload{
 		Token: wc.token,
@@ -172,11 +179,11 @@ func (wc *WebsocketConn) sendIdentify() error {
 	return wc.writeEvent(payload, OpCodeIdentify, "")
 }
 
-func (wc *WebsocketConn) receivedHeatbeat() {
+func (wc *websocketConn) receivedHeatbeat() {
 	wc.heartbeatAckReceived = true
 }
 
-func (wc *WebsocketConn) write(e *outgoingWebsocketEvent) error {
+func (wc *websocketConn) write(e *outgoingWebsocketEvent) error {
 	s, err := json.Marshal(e)
 	if err != nil {
 		wc.logger.Error().Err(err).Msgf("Error marshalling JSON")
@@ -186,7 +193,7 @@ func (wc *WebsocketConn) write(e *outgoingWebsocketEvent) error {
 	return wc.conn.WriteMessage(websocket.TextMessage, s)
 }
 
-func (wc *WebsocketConn) writeEvent(v any, op int, t string) error {
+func (wc *websocketConn) writeEvent(v any, op int, t string) error {
 
 	e := &outgoingWebsocketEvent{
 		websocketEvent: websocketEvent{
