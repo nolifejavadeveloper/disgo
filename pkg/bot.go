@@ -1,26 +1,22 @@
 package pkg
 
 import (
-	"os"
-
 	"github.com/nolifejavadeveloper/disgo/internal"
-
 	"github.com/rs/zerolog"
 )
 
 type DiscordBot struct {
-	conn *internal.WebsocketConn
+	bot *internal.Bot
 }
 
-func NewDiscordBot() *DiscordBot {
+func NewDiscordBot(token string, logger *zerolog.Logger) *DiscordBot {
 	return &DiscordBot{
-		
+		bot: internal.NewBot(token, logger),
 	}
 }
 
-func (db *DiscordBot) Setup(token string) {
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	db.conn = internal.MakeWebsocketConn(&logger, token)
 
-	db.conn.StartReading()
+
+func (db *DiscordBot) Start(token string) {
+	db.bot.Start()
 }
