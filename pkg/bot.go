@@ -15,8 +15,6 @@ func NewDiscordBot(token string, logger *zerolog.Logger) *DiscordBot {
 	}
 }
 
-
-
-func (db *DiscordBot) Start(token string) error {
+func (db *DiscordBot) Start() error {
 	return db.bot.Start()
 }
