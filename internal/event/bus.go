@@ -1,11 +1,19 @@
 package event
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type eventHandler func(any) error
 
 type Bus struct {
 	handlers map[reflect.Type][]eventHandler
+}
+
+func NewBus() *Bus {
+	return &Bus{
+		handlers: make(map[reflect.Type][]eventHandler),
+	}
 }
 
 func Subscribe[T any](b *Bus, handler func(T) error) {
@@ -17,7 +25,7 @@ func Subscribe[T any](b *Bus, handler func(T) error) {
 }
 
 func Fire(b *Bus, event any) {
-	for _, handler := range(b.handlers[reflect.TypeOf(event)]) {
+	for _, handler := range b.handlers[reflect.TypeOf(event)] {
 		handler(event)
 	}
 }

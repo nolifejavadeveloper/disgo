@@ -1,20 +1,13 @@
 package pkg
 
 import (
-	"github.com/nolifejavadeveloper/disgo/internal"
-	"github.com/rs/zerolog"
+	"github.com/nolifejavadeveloper/disgo/internal/event"
 )
 
-type DiscordBot struct {
-	bot *internal.Bot
+type DiscordBot interface {
+	Start(string) error
+	Subscribe(event.Event)
 }
 
-func NewDiscordBot(token string, logger *zerolog.Logger) *DiscordBot {
-	return &DiscordBot{
-		bot: internal.NewBot(token, logger),
-	}
-}
 
-func (db *DiscordBot) Start() error {
-	return db.bot.Start()
-}
+

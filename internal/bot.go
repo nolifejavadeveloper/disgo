@@ -3,22 +3,26 @@ package internal
 import (
 	"fmt"
 
+	ievent "github.com/nolifejavadeveloper/disgo/internal/event"
 	"github.com/rs/zerolog"
 )
 
 type Bot struct {
-	logger *zerolog.Logger
-	conn   *websocketConn
+	logger   *zerolog.Logger
+	conn     *websocketConn
+	eventBus *ievent.Bus
 }
 
-func NewBot(token string, logger *zerolog.Logger) *Bot {
+func NewBot(logger *zerolog.Logger) *Bot {
+	bus := ievent.NewBus()
 	return &Bot{
 		logger: logger,
-		conn:   makeWebsocketConn(logger, token),
+		conn:   makeWebsocketConn(logger, bus),
 	}
 }
 
-func (db *Bot) Start() error {
+func (db *Bot) Start(token string) error {
+	db.conn.token = token
 	err := db.conn.connect()
 	if err != nil {
 		return fmt.Errorf("error connecting to gateway: %s", err.Error())

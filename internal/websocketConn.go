@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/nolifejavadeveloper/disgo/internal/event"
 	"github.com/rs/zerolog"
 )
 
@@ -35,6 +36,8 @@ type websocketConn struct {
 	logger zerolog.Logger
 	conn   *websocket.Conn
 
+	bus *event.Bus
+
 	token   string
 	intents int
 
@@ -54,14 +57,15 @@ type websocketConn struct {
 	ready bool
 }
 
-func makeWebsocketConn(logger *zerolog.Logger, token string) *websocketConn {
+func makeWebsocketConn(logger *zerolog.Logger, bus *event.Bus) *websocketConn {
 	newLogger := logger.With().Str("address", discordGateway).Logger()
 	
 
 	return &websocketConn{
 		logger: newLogger,
+		
+		bus: bus,
 
-		token:   token,
 		intents: 1,
 
 		os:      "Linux",
@@ -129,7 +133,6 @@ func (wc *websocketConn) startHeartbeat() {
 	go func() {
 		wc.receivedHeatbeat()
 
-		// TODO: move to crypto/rand for more random float64 generating
 		wc.logger.Debug().Msg("Starting heartbeat task")
 		jitter := rand.Float64()
 		firstHeartbeat := int64(float64(wc.heartbeatInterval) * jitter)
