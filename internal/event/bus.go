@@ -4,15 +4,15 @@ import (
 	"reflect"
 )
 
-type eventHandler func(any) error
+type EventHandler func(any) error
 
 type Bus struct {
-	handlers map[reflect.Type][]eventHandler
+	handlers map[reflect.Type][]EventHandler
 }
 
 func NewBus() *Bus {
 	return &Bus{
-		handlers: make(map[reflect.Type][]eventHandler),
+		handlers: make(map[reflect.Type][]EventHandler),
 	}
 }
 
