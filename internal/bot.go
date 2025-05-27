@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 
+	"github.com/nolifejavadeveloper/disgo/internal/event"
 	ievent "github.com/nolifejavadeveloper/disgo/internal/event"
 	"github.com/rs/zerolog"
 )
@@ -21,13 +22,17 @@ func NewBot(logger *zerolog.Logger) *Bot {
 	}
 }
 
-func (db *Bot) Start(token string) error {
-	db.conn.token = token
-	err := db.conn.connect()
+func (b *Bot) Start(token string) error {
+	b.conn.token = token
+	err := b.conn.connect()
 	if err != nil {
 		return fmt.Errorf("error connecting to gateway: %s", err.Error())
 	}
-	db.conn.startReading()
+	b.conn.startReading()
 
 	return nil
+}
+
+func (b *Bot) Subscribe(handler ievent.EventHandler) {
+	event.Subscribe(b.eventBus, handler)
 }
