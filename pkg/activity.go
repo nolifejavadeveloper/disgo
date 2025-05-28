@@ -34,6 +34,7 @@ func ActivityStreaming(name string, url string) *Activity {
 	return &Activity{
 		name: name,
 		typ:  ActivityTypeStreaming,
+		url: url,
 	}
 }
 
