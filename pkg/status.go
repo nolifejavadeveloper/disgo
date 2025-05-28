@@ -1,9 +1,9 @@
 package pkg
 
 const (
-	Online       = "online"
-	DoNotDisturb = "dnd"
-	Idle         = "idle"
-	Invisible    = "invisible"
-	Offline      = "offline"
+	StatusOnline       = "online"
+	StatusDoNotDisturb = "dnd"
+	StatusIdle         = "idle"
+	StatusInvisible    = "invisible"
+	StatusOffline      = "offline"
 )
