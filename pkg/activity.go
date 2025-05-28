@@ -13,7 +13,6 @@ type Activity struct {
 	name  string
 	typ   int
 	url   string
-	state string
 }
 
 func NewActivity(name string, typ int, url string, state string) *Activity {
@@ -21,7 +20,6 @@ func NewActivity(name string, typ int, url string, state string) *Activity {
 		name:  name,
 		typ:   typ,
 		url:   url,
-		state: state,
 	}
 }
 
@@ -32,7 +30,7 @@ func ActivityPlaying(name string) *Activity {
 	}
 }
 
-func ActivityStreaming(name string) *Activity {
+func ActivityStreaming(name string, url string) *Activity {
 	return &Activity{
 		name: name,
 		typ:  ActivityTypeStreaming,
