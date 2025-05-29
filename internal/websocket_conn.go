@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/nolifejavadeveloper/disgo/internal/event"
+	"github.com/nolifejavadeveloper/disgo/internal/model"
 	"github.com/rs/zerolog"
 )
 
@@ -171,9 +172,9 @@ func (wc *websocketConn) sendHeartbeat() error {
 
 func (wc *websocketConn) sendIdentify() error {
 	wc.logger.Debug().Msg("Identify sent")
-	payload := &IdentifyPayload{
+	payload := &model.IdentifyEvent{
 		Token: wc.token,
-		Properties: &ConnectionProperties{
+		Properties: &model.ConnectionProperties{
 			Os:      wc.os,
 			Browser: wc.browser,
 			Device:  wc.os,
