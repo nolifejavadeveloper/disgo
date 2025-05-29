@@ -21,7 +21,7 @@ var dispatchHandler messageHandler = func(wc *websocketConn, data []byte, t stri
 		return err
 	}
 
-	handleDispatch(e, t)
+	handleDispatch(wc, e, t)
 
 	return nil
 }
@@ -29,9 +29,9 @@ var dispatchHandler messageHandler = func(wc *websocketConn, data []byte, t stri
 func handleDispatch(wc *websocketConn, e any, t string) {
 	switch t {
 	case "READY":
-		e = e.(model.ReadyEvent)
-		wc.resumeUrl = e.ResumeGatewayUrl
-		wc.sessionId = e.SessionId
+		ready := e.(model.ReadyEvent)
+		wc.resumeUrl = ready.ResumeGatewayUrl
+		wc.sessionId = ready.SessionId
 	}
 }
 
