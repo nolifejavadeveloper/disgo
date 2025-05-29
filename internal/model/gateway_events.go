@@ -1,13 +1,13 @@
 package model
 
 type IdentifyEvent struct {
-	Token          string               `json:"token"`
+	Token          string                `json:"token"`
 	Properties     *ConnectionProperties `json:"properties"`
-	Compress       bool                 `json:"compress,omitempty"`
-	LargeThreshold int                  `json:"large_threshold,omitempty"`
-	Shard          []int                `json:"shard,omitempty"`
-	Presence       any                  `json:"presence,omitempty"`
-	Intents        int                  `json:"intents,omitempty"`
+	Compress       bool                  `json:"compress,omitempty"`
+	LargeThreshold int                   `json:"large_threshold,omitempty"`
+	Shard          []int                 `json:"shard,omitempty"`
+	Presence       any                   `json:"presence,omitempty"`
+	Intents        int                   `json:"intents,omitempty"`
 }
 
 type ConnectionProperties struct {
@@ -17,14 +17,13 @@ type ConnectionProperties struct {
 }
 
 type ReadyEvent struct {
-	V int `json:"v"`
-	User *User `json:"user"`
-	Guilds int `json:"guilds"`
-	SessionId string `json:"session_id"`
+	V                int    `json:"v"`
+	User             *User  `json:"user"`
+	Guilds           int    `json:"guilds"`
+	SessionId        string `json:"session_id"`
 	ResumeGatewayUrl string `json:"resume_gateway_url"`
-	Shard []int `json:"shard,omitempty"`
-	Application string `json:"application"`
-
+	Shard            []int  `json:"shard,omitempty"`
+	Application      string `json:"application"`
 }
 
 type UpdatePresenceEvent struct {
