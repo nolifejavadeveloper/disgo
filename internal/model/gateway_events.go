@@ -3,7 +3,7 @@ package model
 type IdentifyEvent struct {
 	Token          string                `json:"token"`
 	Properties     *ConnectionProperties `json:"properties"`
-	Compress       bool                  `json:"compress,omitempty"`
+	Compress       *bool                  `json:"compress,omitempty"`
 	LargeThreshold int                   `json:"large_threshold,omitempty"`
 	Shard          []int                 `json:"shard,omitempty"`
 	Presence       *UpdatePresenceEvent  `json:"presence,omitempty"`
