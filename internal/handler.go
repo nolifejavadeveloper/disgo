@@ -2,11 +2,37 @@ package internal
 
 import (
 	"encoding/json"
+
+	"github.com/nolifejavadeveloper/disgo/internal/model"
 )
 
 var dispatchHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
 	wc.logger.Debug().Msg("Dispatch recieved from Discord with T: " + t)
+
+	var e any
+
+	switch t {
+	case "READY":
+		e = &model.ReadyEvent{}
+	}
+
+	err := json.Unmarshal(data, e)
+	if err != nil {
+		return err
+	}
+
+	handleDispatch(e, t)
+
 	return nil
+}
+
+func handleDispatch(wc *websocketConn, e any, t string) {
+	switch t {
+	case "READY":
+		e = e.(model.ReadyEvent)
+		wc.resumeUrl = e.ResumeGatewayUrl
+		wc.sessionId = e.SessionId
+	}
 }
 
 var heartbeatHandler messageHandler = func(wc *websocketConn, data []byte, t string) error {
