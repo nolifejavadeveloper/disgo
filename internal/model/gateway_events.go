@@ -6,7 +6,7 @@ type IdentifyEvent struct {
 	Compress       bool                  `json:"compress,omitempty"`
 	LargeThreshold int                   `json:"large_threshold,omitempty"`
 	Shard          []int                 `json:"shard,omitempty"`
-	Presence       any                   `json:"presence,omitempty"`
+	Presence       *UpdatePresenceEvent   `json:"presence,omitempty"`
 	Intents        int                   `json:"intents,omitempty"`
 }
 
