@@ -3,7 +3,7 @@ package model
 type IdentifyEvent struct {
 	Token          string                `json:"token"`
 	Properties     *ConnectionProperties `json:"properties"`
-	Compress       *bool                  `json:"compress,omitempty"`
+	Compress       *bool                 `json:"compress,omitempty"`
 	LargeThreshold int                   `json:"large_threshold,omitempty"`
 	Shard          []int                 `json:"shard,omitempty"`
 	Presence       *UpdatePresenceEvent  `json:"presence,omitempty"`
@@ -14,6 +14,12 @@ type ConnectionProperties struct {
 	Os      string `json:"os"`
 	Browser string `json:"browser"`
 	Device  string `json:"device"`
+}
+
+type ResumeEvent struct {
+	Token     string `json:"token"`
+	SessionId string `json:"session_id"`
+	Seq       int    `json:"seq"`
 }
 
 type ReadyEvent struct {
