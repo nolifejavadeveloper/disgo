@@ -52,7 +52,9 @@ type websocketConn struct {
 
 	heartbeatAckReceived bool
 
+	sessionId string
 	resumeUrl string
+
 
 	ready bool
 }
