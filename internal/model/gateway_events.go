@@ -22,6 +22,9 @@ type ResumeEvent struct {
 	Seq       int    `json:"seq"`
 }
 
+type ResumedEvent struct {
+}
+
 type ReadyEvent struct {
 	V                int    `json:"v"`
 	User             *User  `json:"user"`
