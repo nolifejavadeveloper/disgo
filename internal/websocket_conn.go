@@ -151,6 +151,7 @@ func (wc *websocketConn) handleDisconnect(code int, msg string) {
 	wc.logger.Warn().Str("gateway_nessage", msg).Int("error_code", code).Str("error_code_definition", err.Message).Msg("Connection closed by discord gateway")
 	if err.ShouldReconnect {
 		wc.logger.Info().Msg("Reconnecting to resume gateway")
+		wc.stopHeartbeat()
 		wc.connect(wc.resumeUrl)
 		wc.shouldResume = true
 		return
