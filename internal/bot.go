@@ -24,7 +24,7 @@ func NewBot(logger *zerolog.Logger) *Bot {
 
 func (b *Bot) Start(token string) error {
 	b.conn.token = token
-	err := b.conn.connect()
+	err := b.conn.connect(discordGateway)
 	if err != nil {
 		return fmt.Errorf("error connecting to gateway: %s", err.Error())
 	}
