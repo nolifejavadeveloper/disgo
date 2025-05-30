@@ -232,7 +232,7 @@ func (wc *websocketConn) write(e *outgoingWebsocketEvent) error {
 	return wc.conn.WriteMessage(websocket.TextMessage, s)
 }
 
-func (wc *websocketConn) resume() {
+func (wc *websocketConn) sendResume() {
 	e := &model.ResumeEvent{
 		Token:     wc.token,
 		SessionId: wc.sessionId,
