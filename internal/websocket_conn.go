@@ -51,6 +51,7 @@ type websocketConn struct {
 
 	heartbeatInterval int64
 	lastHeartbeat     int64
+	quitHeartbeat     chan struct{}
 
 	lastSeq *int
 
@@ -159,7 +160,6 @@ func (wc *websocketConn) handleDisconnect(code int, msg string) {
 func (wc *websocketConn) startHeartbeat() {
 	go func() {
 		wc.receivedHeatbeat()
-
 		wc.logger.Debug().Msg("Starting heartbeat task")
 		jitter := rand.Float64()
 		firstHeartbeat := int64(float64(wc.heartbeatInterval) * jitter)
@@ -169,19 +169,24 @@ func (wc *websocketConn) startHeartbeat() {
 		wc.lastHeartbeat = time.Now().Local().UnixMilli() - firstHeartbeat
 
 		for {
-			if time.Now().Local().UnixMilli()-wc.lastHeartbeat > wc.heartbeatInterval {
-				if !wc.heartbeatAckReceived {
-					// reconnect
-					wc.logger.Warn().Msg("Last heartbeat did not receive ack, reconnecting...")
-					return
-				}
+			select {
+			case <-wc.quitHeartbeat:
+				return
+			default:
+				if time.Now().Local().UnixMilli()-wc.lastHeartbeat > wc.heartbeatInterval {
+					if !wc.heartbeatAckReceived {
+						// reconnect
+						wc.logger.Warn().Msg("Last heartbeat did not receive ack, reconnecting...")
+						return
+					}
 
-				err := wc.sendHeartbeat()
-				if err != nil {
-					wc.logger.Error().Err(err).Msg("Error sending timmed heartbeat")
-					continue
+					err := wc.sendHeartbeat()
+					if err != nil {
+						wc.logger.Error().Err(err).Msg("Error sending timmed heartbeat")
+						continue
+					}
+					wc.logger.Debug().Msg("Sucessfully sent timed heartbeat")
 				}
-				wc.logger.Debug().Msg("Sucessfully sent timed heartbeat")
 			}
 		}
 	}()
@@ -192,6 +197,10 @@ func (wc *websocketConn) sendHeartbeat() error {
 	wc.heartbeatAckReceived = false
 
 	return wc.writeEvent(wc.lastSeq, OpCodeHeartbeat, "")
+}
+
+func (wc *websocketConn) stopHeartbeat() {
+	wc.quitHeartbeat <- struct{}{}
 }
 
 func (wc *websocketConn) sendIdentify() error {
