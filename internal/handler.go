@@ -57,7 +57,11 @@ var helloHandler messageHandler = func(wc *websocketConn, data []byte, t string)
 
 	wc.startHeartbeat()
 
-	wc.sendIdentify()
+	if wc.shouldResume {
+		wc.resume()
+	}else {
+		wc.sendIdentify()
+	}
 
 	return nil
 }
