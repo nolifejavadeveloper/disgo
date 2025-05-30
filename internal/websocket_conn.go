@@ -155,6 +155,8 @@ func (wc *websocketConn) handleDisconnect(code int, msg string) {
 		wc.connect(wc.resumeUrl)
 		wc.shouldResume = true
 		return
+	} else {
+		wc.logger.Panic().Msgf("Error code stated not to reconnect: %d %s", code, err.Message)
 	}
 }
 
