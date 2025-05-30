@@ -17,6 +17,8 @@ var gatewayDisconnectErrors map[int]GatewayDisconnectError = make(map[int]Gatewa
 func init() {
 	// register error codes
 	// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+	gatewayDisconnectErrors[1000] = newEntry("Normal closure", true)
+	gatewayDisconnectErrors[1001] = newEntry("Going away", true)
 	gatewayDisconnectErrors[4000] = newEntry("Unknown error", true)
 	gatewayDisconnectErrors[4001] = newEntry("Unknown opcode", true)
 	gatewayDisconnectErrors[4002] = newEntry("Decode error", true)
