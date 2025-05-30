@@ -213,7 +213,7 @@ func (wc *websocketConn) sendIdentify() error {
 		Properties: &model.ConnectionProperties{
 			Os:      wc.os,
 			Browser: wc.browser,
-			Device:  wc.os,
+			Device:  wc.device,
 		},
 		Intents: wc.intents,
 	}
