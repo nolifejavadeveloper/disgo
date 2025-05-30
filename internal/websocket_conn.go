@@ -6,10 +6,13 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	gerrors "github.com/nolifejavadeveloper/disgo/internal/errors"
 	"github.com/nolifejavadeveloper/disgo/internal/event"
 	"github.com/nolifejavadeveloper/disgo/internal/model"
 	"github.com/rs/zerolog"
 )
+
+//https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
 
 const discordGateway = "wss://gateway.discord.gg/?v=10&encoding=json"
 
@@ -56,17 +59,16 @@ type websocketConn struct {
 	sessionId string
 	resumeUrl string
 
-
-	ready bool
+	ready        bool
+	shouldResume bool
 }
 
 func makeWebsocketConn(logger *zerolog.Logger, bus *event.Bus) *websocketConn {
 	newLogger := logger.With().Str("address", discordGateway).Logger()
-	
 
 	return &websocketConn{
 		logger: newLogger,
-		
+
 		bus: bus,
 
 		intents: 1,
@@ -77,8 +79,8 @@ func makeWebsocketConn(logger *zerolog.Logger, bus *event.Bus) *websocketConn {
 	}
 }
 
-func (wc *websocketConn) connect() error {
-	conn, _, err := websocket.DefaultDialer.Dial(discordGateway, nil)
+func (wc *websocketConn) connect(addr string) error {
+	conn, _, err := websocket.DefaultDialer.Dial(addr, nil)
 	if err != nil {
 		wc.logger.Error().Err(err).Msg("Error while dialing websocket")
 		return err
@@ -102,6 +104,12 @@ func (wc *websocketConn) startReading() {
 func (wc *websocketConn) read() {
 	messageType, data, err := wc.conn.ReadMessage()
 	if err != nil {
+		if closeErr, ok := err.(*websocket.CloseError); ok {
+			wc.handleDisconnect(closeErr.Code, closeErr.Text)
+			wc.conn.Close()
+			return
+		}
+
 		wc.logger.Error().Err(err).Msg("Error reading from websocket")
 		return
 	}
@@ -129,6 +137,22 @@ func (wc *websocketConn) read() {
 		if err != nil {
 			wc.logger.Error().Int("opcode", msg.Op).Err(err).Msg("Failed to handle message")
 		}
+	}
+}
+
+func (wc *websocketConn) handleDisconnect(code int, msg string) {
+	err, ok := gerrors.GetGatewayErrorByCode(code)
+	if !ok {
+		wc.logger.Error().Msgf("Gateway connection closed with unknown error code: %d", code)
+		return
+	}
+
+	wc.logger.Warn().Str("gateway_nessage", msg).Int("error_code", code).Str("error_code_definition", err.Message).Msg("Connection closed by discord gateway")
+	if err.ShouldReconnect {
+		wc.logger.Info().Msg("Reconnecting to resume gateway")
+		wc.connect(wc.resumeUrl)
+		wc.shouldResume = true
+		return
 	}
 }
 
@@ -199,8 +223,17 @@ func (wc *websocketConn) write(e *outgoingWebsocketEvent) error {
 	return wc.conn.WriteMessage(websocket.TextMessage, s)
 }
 
-func (wc *websocketConn) writeEvent(v any, op int, t string) error {
+func (wc *websocketConn) resume() {
+	e := &model.ResumeEvent{
+		Token:     wc.token,
+		SessionId: wc.sessionId,
+		Seq:       *wc.lastSeq,
+	}
 
+	wc.writeEvent(e, OpCodeResume, "")
+}
+
+func (wc *websocketConn) writeEvent(v any, op int, t string) error {
 	e := &outgoingWebsocketEvent{
 		websocketEvent: websocketEvent{
 			Op: op,
